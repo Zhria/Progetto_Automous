@@ -16,7 +16,7 @@ class ReteNeurale(tf.keras.Model):
         self.pool3 = tf.keras.layers.MaxPooling2D((2, 2))
         self.flatten = layers.Flatten()  # Appiattisce (64, 64, 3) in (64*64*3)
         self.dense2 = layers.Dense(128, activation='relu')
-        self.dense3 = layers.Dense(dim_out, activation='softmax' if softmax else None)
+        self.dense3 = layers.Dense(dim_out)
     def call(self, inputs):
         #Controllo che l'input sia un tensore.
         if not isinstance(inputs, tf.Tensor):
@@ -30,4 +30,10 @@ class ReteNeurale(tf.keras.Model):
         x = self.flatten(x)        
         x = self.dense2(x)
         x=self.dense3(x)
+        if(self.softmax):
+            #converto in float64 per evitare problemi di precisione
+            x=tf.dtypes.cast(x,tf.float64)
+            x=tf.nn.softmax(x,axis=1)
+            #Rconverto in float32 per evitare problemi di precisione
+            x=tf.dtypes.cast(x,tf.float32)
         return x
