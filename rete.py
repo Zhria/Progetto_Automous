@@ -21,6 +21,10 @@ class ReteNeurale(tf.keras.Model):
         #Controllo che l'input sia un tensore.
         if not isinstance(inputs, tf.Tensor):
             inputs = tf.convert_to_tensor(inputs)
+
+        #input normalization
+        inputs = tf.cast(inputs, tf.float32) / 255.0
+        
         x = self.conv1(inputs)
         x = self.pool1(x)
         x = self.conv2(x)
