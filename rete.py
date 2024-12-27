@@ -14,6 +14,7 @@ class ReteNeurale(tf.keras.Model):
         self.conv3 = layers.Conv2D(128, (3, 3), activation='relu',padding="same")
         self.pool3 = layers.MaxPooling2D((2, 2),data_format="channels_last")
         self.flatten = layers.Flatten(data_format="channels_last")  # Appiattisce (64, 64, 3) in (64*64*3)
+        self.dropout= layers.Dropout(0.5) # Dropout per evitare overfitting
         self.dense2 = layers.Dense(128, activation='relu')
         self.policy = layers.Dense(dim_out, activation='softmax')
         self.value= layers.Dense(1)
@@ -31,7 +32,8 @@ class ReteNeurale(tf.keras.Model):
         x = self.pool2(x)
         x = self.conv3(x)
         x = self.pool3(x)
-        x = self.flatten(x)        
+        x = self.flatten(x)
+        x = self.dropout(x)        
         x = self.dense2(x)
         policy=self.policy(x)
         value=self.value(x)
