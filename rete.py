@@ -7,6 +7,7 @@ class ReteNeurale(tf.keras.Model):
     def __init__(self, dim_in,dim_out,softmax=False):
         super(ReteNeurale, self).__init__()
         self.softmax=softmax
+        """
         self.conv1 = layers.Conv2D(filters=32, kernel_size=(3,3), activation='tanh', input_shape=dim_in)  # Reduced filters, changed activation
         # Layer convoluzionali per estrarre caratteristiche
         self.pool1 = layers.MaxPooling2D((2, 2),data_format="channels_last")  # Riduce la dimensione dell'immagine
@@ -14,12 +15,21 @@ class ReteNeurale(tf.keras.Model):
         self.pool2 = layers.MaxPooling2D((2, 2),data_format="channels_last")
         self.conv3 = layers.Conv2D(128, (3, 3), activation='relu',padding="same")
         self.pool3 = layers.MaxPooling2D((2, 2),data_format="channels_last")
+        """
+        self.conv1 = layers.Conv2D(filters=32, kernel_size=(3,3),strides=1,padding="valid", activation='relu', kernel_initializer="glorot_uniform", input_shape=dim_in)  # Reduced filters, changed activation
+        # Layer convoluzionali per estrarre caratteristiche
+        self.pool1 = layers.MaxPooling2D((3, 2),data_format="channels_last")  # Riduce la dimensione dell'immagine
+        self.conv2 = layers.Conv2D(filters=32, kernel_size=(3,3),strides=1,padding="valid", activation='relu', kernel_initializer="glorot_uniform")
+        self.pool2 = layers.MaxPooling2D((3, 2),data_format="channels_last")
+        self.conv3 = layers.Conv2D(filters=32, kernel_size=(3,3),strides=1,padding="valid", activation='relu', kernel_initializer="glorot_uniform")
+        self.pool3 = layers.MaxPooling2D((3, 2),data_format="channels_last")
         self.flatten = layers.Flatten(data_format="channels_last")  # Appiattisce (64, 64, 3) in (64*64*3)
         self.dropout= layers.Dropout(0.5) # Dropout per evitare overfitting
-        self.dense2 = layers.Dense(128, activation='relu')
-        self.lastLayer= layers.Dense(dim_out, activation='softmax' if self.softmax else None)
-        #self.policy = layers.Dense(dim_out, activation='softmax')
-        #self.value= layers.Dense(1)
+        self.dense2 = layers.Dense(256, activation='tanh')
+        self.dense3=layers.Dense(128)
+        #self.lastLayer= layers.Dense(dim_out, activation='softmax' if self.softmax else None)
+        self.policy = layers.Dense(dim_out)
+        self.value= layers.Dense(1)
     def call(self, inputs):
         #Controllo che l'input sia un tensore.
         if not isinstance(inputs, tf.Tensor):
@@ -37,6 +47,7 @@ class ReteNeurale(tf.keras.Model):
         x = self.flatten(x)
         x = self.dropout(x)        
         x = self.dense2(x)
-        #policy=self.policy(x)
-        #value=self.value(x)
-        return self.lastLayer(x) #, policy, value
+        x=self.dense3(x)
+        policy=self.policy(x)
+        value=self.value(x)
+        return policy, value
